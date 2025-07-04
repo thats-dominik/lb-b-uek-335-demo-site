@@ -644,14 +644,14 @@
 <body>
     <div class="custom-cursor"></div>
 
-    <nav class="nav">
-        <div class="nav-container">
-            <div class="logo holo-effect">
-                <div class="logo-icon">📦</div>
-                <span>TrackIt</span>
-            </div>
+<nav class="nav">
+    <div class="nav-container">
+        <div class="logo holo-effect">
+            <img src="icon.png" alt="TrackIt Logo" class="logo-icon" style="width: 32px; height: 32px; vertical-align: middle;"/>
+            <span>TrackIt</span>
         </div>
-    </nav>
+    </div>
+</nav>
 
     <section class="hero">
         <div class="hero-container">
@@ -683,7 +683,7 @@
                 <div class="phone-mockup holo-effect">
                     <div class="phone-notch"></div>
                     <div class="phone-screen">
-                        <img src="screenshot1.img" alt="TrackIt App Screenshot" class="screenshot-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <img src="screenshot1.jpeg" alt="TrackIt App Screenshot" class="screenshot-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <div style="display: none; width: 100%; height: 100%; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); align-items: center; justify-content: center; color: white; font-size: 48px; flex-direction: column; gap: 16px;">
                             📦
                             <div style="font-size: 16px; text-align: center;">TrackIt<br>Swiss Post</div>
@@ -767,56 +767,44 @@
                 
                 <div class="screenshots-grid">
                     <div class="screenshot-card holo-effect">
-                        <div class="screenshot-mockup">
-                            <div class="screenshot-content">
-                                <div>🏠</div>
-                                <div style="font-size: 12px; text-align: center;">Home<br>Screen</div>
-                            </div>
-                        </div>
-                        <h3 class="screenshot-title">Einfache Eingabe</h3>
-                        <p class="screenshot-description">
-                            Swiss Post Sendungsnummer eingeben und automatische Erkennung nutzen
-                        </p>
+                    <div class="screenshot-mockup" style="position: relative; overflow: hidden;">
+                        <!-- Handyrahmen-Design bleibt gleich, Bild wird eingefügt: -->
+                        <img 
+                        src="screenshot1.jpeg" 
+                        alt="Screenshot Home Screen" 
+                        style="
+                            width: 100%; 
+                            height: 100%; 
+                            object-fit: cover; 
+                            border-radius: 28px; /* oder wie beim Rahmen */
+                            display: block;
+                        " />
+                    </div>
+                    <h3 class="screenshot-title">Einfache Eingabe</h3>
+                    <p class="screenshot-description">
+                        Swiss Post Sendungsnummer eingeben und automatische Erkennung nutzen
+                    </p>
                     </div>
                     
-                    <div class="screenshot-card holo-effect">
-                        <div class="screenshot-mockup">
-                            <div class="screenshot-content">
-                                <div>📱</div>
-                                <div style="font-size: 12px; text-align: center;">Detail<br>View</div>
-                            </div>
-                        </div>
-                        <h3 class="screenshot-title">Detaillierte Verfolgung</h3>
-                        <p class="screenshot-description">
-                            Komplette Timeline mit Swiss Post Sendungsereignissen in Echtzeit
-                        </p>
-                    </div>
+                <div class="screenshot-card holo-effect">
+                <div class="screenshot-mockup" style="position: relative; overflow: hidden;">
+                    <img 
+                    src="screenshot2.jpeg" 
+                    alt="Screenshot Detail View" 
+                    style="
+                        width: 100%; 
+                        height: 100%; 
+                        object-fit: cover; 
+                        border-radius: 28px;
+                        display: block;
+                    " />
+                </div>
+                <h3 class="screenshot-title">Detaillierte Verfolgung</h3>
+                <p class="screenshot-description">
+                    Komplette Timeline mit Swiss Post Sendungsereignissen in Echtzeit
+                </p>
+                </div>
                     
-                    <div class="screenshot-card holo-effect">
-                        <div class="screenshot-mockup">
-                            <div class="screenshot-content">
-                                <div>⏰</div>
-                                <div style="font-size: 12px; text-align: center;">ETA<br>Prediction</div>
-                            </div>
-                        </div>
-                        <h3 class="screenshot-title">Ankunftszeit-Vorhersage</h3>
-                        <p class="screenshot-description">
-                            Präzise Lieferzeit-Schätzung basierend auf Swiss Post Daten
-                        </p>
-                    </div>
-                    
-                    <div class="screenshot-card holo-effect">
-                        <div class="screenshot-mockup">
-                            <div class="screenshot-content">
-                                <div>✅</div>
-                                <div style="font-size: 12px; text-align: center;">Delivered<br>Status</div>
-                            </div>
-                        </div>
-                        <h3 class="screenshot-title">Zustellungs-Status</h3>
-                        <p class="screenshot-description">
-                            Klare Anzeige des Swiss Post Zustellstatus mit Details
-                        </p>
-                    </div>
                 </div>
             </div>
         </div>
