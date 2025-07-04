@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrackIt - Intelligente Sendungsverfolgung</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #e2e8f0;
+            background: #0a0a0a;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.8) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease;
+            mix-blend-mode: screen;
+        }
+
+        .custom-cursor::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 2px;
+            background: #6366f1;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .holo-effect {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .holo-effect::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 30%,
+                rgba(99, 102, 241, 0.1) 50%,
+                transparent 70%
+            );
+            opacity: 0;
+            transform: translateX(-100%) translateY(-100%);
+            transition: all 0.6s ease;
+            pointer-events: none;
+        }
+
+        .holo-effect:hover::before {
+            opacity: 1;
+            transform: translateX(100%) translateY(100%);
+        }
+
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+            padding: 16px 0;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        }
+
+        .hero {
+            padding: 180px 0 120px;
+            text-align: center;
+            background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 60% 40%, rgba(59, 130, 246, 0.1) 0%, transparent 30%);
+            pointer-events: none;
+            animation: shimmer 8s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .hero-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 32px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            padding: 8px 16px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 32px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .hero h1 {
+            font-size: clamp(56px, 10vw, 96px);
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 32px;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
+            text-shadow: 0 0 40px rgba(99, 102, 241, 0.5);
+        }
+
+        .hero-gradient {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.5));
+        }
+
+        .hero-subtitle {
+            font-size: 24px;
+            color: #94a3b8;
+            margin-bottom: 56px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            font-weight: 400;
+            line-height: 1.5;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 100px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 18px 36px;
+            border-radius: 16px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.4s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 50px rgba(99, 102, 241, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #e2e8f0;
+            border-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .hero-visual {
+            position: relative;
+            max-width: 900px;
+            margin: 0 auto;
+            perspective: 1200px;
+        }
+
+        .phone-mockup {
+            width: 320px;
+            height: 640px;
+            background: linear-gradient(145deg, #1a1a1a 0%, #0d1117 100%);
+            border-radius: 40px;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: 
+                0 30px 80px rgba(0, 0, 0, 0.8),
+                0 0 60px rgba(99, 102, 241, 0.3),
+                inset 0 2px 4px rgba(255, 255, 255, 0.1);
+            transform: rotateX(12deg) rotateY(-8deg);
+            animation: float 6s ease-in-out infinite;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: rotateX(12deg) rotateY(-8deg) translateY(0px);
+            }
+            50% { 
+                transform: rotateX(12deg) rotateY(-8deg) translateY(-25px);
+            }
+        }
+
+        .phone-screen {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            right: 24px;
+            bottom: 24px;
+            background: #000;
+            border-radius: 28px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .screenshot-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 28px;
+        }
+
+        .phone-notch {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 24px;
+            background: #000;
+            border-radius: 12px;
+            z-index: 10;
+        }
+
+        .section {
+            padding: 140px 0;
+            position: relative;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 100px;
+        }
+
+        .section-title {
+            font-size: clamp(40px, 6vw, 64px);
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+            text-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+        }
+
+        .section-subtitle {
+            font-size: 22px;
+            color: #94a3b8;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 32px;
+            margin-top: 100px;
+            justify-items: center;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 24px;
+            padding: 48px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            max-width: 420px;
+            text-align: center;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 60px rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: white;
+            margin: 0 auto 32px;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .feature-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 16px;
+        }
+
+        .feature-description {
+            color: #94a3b8;
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        .screenshots-section {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 40px;
+            padding: 100px 60px;
+            margin: 100px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+        }
+
+        .screenshots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            margin-top: 80px;
+            justify-items: center;
+        }
+
+        .screenshot-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 32px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            max-width: 320px;
+        }
+
+        .screenshot-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.2);
+        }
+
+        .screenshot-mockup {
+            width: 180px;
+            height: 320px;
+            background: linear-gradient(145deg, #1a1a1a 0%, #0d1117 100%);
+            border-radius: 24px;
+            margin: 0 auto 24px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        }
+
+        .screenshot-content {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            right: 16px;
+            bottom: 16px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 36px;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .screenshot-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .screenshot-description {
+            font-size: 14px;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            color: white;
+            text-align: center;
+            padding: 120px 0;
+            position: relative;
+            overflow: hidden;
+            border-radius: 40px;
+            margin: 100px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(139, 92, 246, 0.3) 0%, transparent 50%);
+            animation: shimmer 8s ease-in-out infinite;
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .cta-title {
+            font-size: clamp(36px, 6vw, 56px);
+            font-weight: 800;
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+            text-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+        }
+
+        .cta-subtitle {
+            font-size: 22px;
+            color: #a5b4fc;
+            margin-bottom: 48px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .footer {
+            background: rgba(0, 0, 0, 0.8);
+            color: #64748b;
+            text-align: center;
+            padding: 60px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        .footer-text {
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .footer-project {
+            font-size: 14px;
+            color: #475569;
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 140px 0 80px;
+            }
+            
+            .hero-cta {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+            
+            .phone-mockup {
+                width: 280px;
+                height: 560px;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            
+            .feature-card {
+                padding: 32px;
+                max-width: none;
+            }
+            
+            .screenshots-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .section {
+                padding: 100px 0;
+            }
+            
+            .cta-section {
+                padding: 80px 0;
+            }
+
+            .container {
+                padding: 0 20px;
+            }
+
+            .nav-container {
+                padding: 0 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .screenshots-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .phone-mockup {
+                width: 250px;
+                height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="custom-cursor"></div>
+
+    <nav class="nav">
+        <div class="nav-container">
+            <div class="logo holo-effect">
+                <div class="logo-icon">📦</div>
+                <span>TrackIt</span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-badge holo-effect">
+                <span>🚀</span>
+                Swiss Post Integration
+            </div>
+            
+            <h1>
+                Intelligente <span class="hero-gradient">Sendungsverfolgung</span> für deine Pakete
+            </h1>
+            
+            <p class="hero-subtitle">
+                Speziell für Swiss Post entwickelt mit automatischer Carrier-Erkennung und präziser Ankunftszeit-Vorhersage. Eine App für alle deine Pakete.
+            </p>
+            
+            <div class="hero-cta">
+                <a href="#download" class="btn btn-primary holo-effect">
+                    <span>📱</span>
+                    Jetzt herunterladen
+                </a>
+                <a href="#features" class="btn btn-secondary holo-effect">
+                    <span>🔍</span>
+                    Features entdecken
+                </a>
+            </div>
+            
+            <div class="hero-visual">
+                <div class="phone-mockup holo-effect">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <img src="screenshot1.img" alt="TrackIt App Screenshot" class="screenshot-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div style="display: none; width: 100%; height: 100%; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); align-items: center; justify-content: center; color: white; font-size: 48px; flex-direction: column; gap: 16px;">
+                            📦
+                            <div style="font-size: 16px; text-align: center;">TrackIt<br>Swiss Post</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Warum TrackIt?</h2>
+                <p class="section-subtitle">
+                    Speziell für Swiss Post optimiert mit intelligenter Technologie für die ultimative Sendungsverfolgung
+                </p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card holo-effect">
+                    <div class="feature-icon">🇨🇭</div>
+                    <h3 class="feature-title">Swiss Post Spezialist</h3>
+                    <p class="feature-description">
+                        Optimiert für Swiss Post mit automatischer Erkennung und Support für weitere internationale Paketdienste bei Bedarf.
+                    </p>
+                </div>
+                
+                <div class="feature-card holo-effect">
+                    <div class="feature-icon">📍</div>
+                    <h3 class="feature-title">Präzise Ankunftszeit</h3>
+                    <p class="feature-description">
+                        Berechnet exakte Lieferzeiten basierend auf aktueller Paket-Position und Lieferroute für zuverlässige Vorhersagen.
+                    </p>
+                </div>
+                
+                <div class="feature-card holo-effect">
+                    <div class="feature-icon">🔍</div>
+                    <h3 class="feature-title">Automatische Erkennung</h3>
+                    <p class="feature-description">
+                        Erkennt automatisch Swiss Post Sendungen und weitere Carrier anhand der Sendungsnummer. Null manueller Aufwand.
+                    </p>
+                </div>
+                
+                <div class="feature-card holo-effect">
+                    <div class="feature-icon">📱</div>
+                    <h3 class="feature-title">Modernes Design</h3>
+                    <p class="feature-description">
+                        Dunkles Design mit eleganten Animationen und Touch-optimierten Elementen für beste User Experience.
+                    </p>
+                </div>
+                
+                <div class="feature-card holo-effect">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">Swiss Zuverlässig</h3>
+                    <p class="feature-description">
+                        Optimierte Performance mit intelligenten Fallback-Systemen. Funktioniert auch bei schwacher Verbindung.
+                    </p>
+                </div>
+                
+                <div class="feature-card holo-effect">
+                    <div class="feature-icon">🔒</div>
+                    <h3 class="feature-title">Datenschutz First</h3>
+                    <p class="feature-description">
+                        Lokale Datenspeicherung nach Schweizer Standards. Deine Sendungsdaten bleiben privat und sicher.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="screenshots">
+        <div class="container">
+            <div class="screenshots-section">
+                <div class="section-header">
+                    <h2 class="section-title">App in Aktion</h2>
+                    <p class="section-subtitle">
+                        Erleben Sie, wie TrackIt die Swiss Post Sendungsverfolgung revolutioniert
+                    </p>
+                </div>
+                
+                <div class="screenshots-grid">
+                    <div class="screenshot-card holo-effect">
+                        <div class="screenshot-mockup">
+                            <div class="screenshot-content">
+                                <div>🏠</div>
+                                <div style="font-size: 12px; text-align: center;">Home<br>Screen</div>
+                            </div>
+                        </div>
+                        <h3 class="screenshot-title">Einfache Eingabe</h3>
+                        <p class="screenshot-description">
+                            Swiss Post Sendungsnummer eingeben und automatische Erkennung nutzen
+                        </p>
+                    </div>
+                    
+                    <div class="screenshot-card holo-effect">
+                        <div class="screenshot-mockup">
+                            <div class="screenshot-content">
+                                <div>📱</div>
+                                <div style="font-size: 12px; text-align: center;">Detail<br>View</div>
+                            </div>
+                        </div>
+                        <h3 class="screenshot-title">Detaillierte Verfolgung</h3>
+                        <p class="screenshot-description">
+                            Komplette Timeline mit Swiss Post Sendungsereignissen in Echtzeit
+                        </p>
+                    </div>
+                    
+                    <div class="screenshot-card holo-effect">
+                        <div class="screenshot-mockup">
+                            <div class="screenshot-content">
+                                <div>⏰</div>
+                                <div style="font-size: 12px; text-align: center;">ETA<br>Prediction</div>
+                            </div>
+                        </div>
+                        <h3 class="screenshot-title">Ankunftszeit-Vorhersage</h3>
+                        <p class="screenshot-description">
+                            Präzise Lieferzeit-Schätzung basierend auf Swiss Post Daten
+                        </p>
+                    </div>
+                    
+                    <div class="screenshot-card holo-effect">
+                        <div class="screenshot-mockup">
+                            <div class="screenshot-content">
+                                <div>✅</div>
+                                <div style="font-size: 12px; text-align: center;">Delivered<br>Status</div>
+                            </div>
+                        </div>
+                        <h3 class="screenshot-title">Zustellungs-Status</h3>
+                        <p class="screenshot-description">
+                            Klare Anzeige des Swiss Post Zustellstatus mit Details
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section" id="download">
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="cta-title">Bereit für Swiss Post Tracking?</h2>
+                <p class="cta-subtitle">
+                    Kostenlos verfügbar für iOS und Android
+                </p>
+                <div class="hero-cta">
+                    <a href="#" class="btn btn-primary holo-effect">
+                        <span>📱</span>
+                        App Store & Google Play
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p class="footer-text">
+                © 2024 TrackIt - Swiss Post Sendungsverfolgung | Entwickelt von Dominik Hammerle
+            </p>
+            <p class="footer-project">
+                Projektarbeit 335 - Mobile-Applikation realisieren
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Custom cursor
+        const cursor = document.querySelector('.custom-cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
